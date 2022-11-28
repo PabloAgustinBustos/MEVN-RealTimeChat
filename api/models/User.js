@@ -1,10 +1,10 @@
 const {Schema, SchemaTypes, model} = require("mongoose")
-const {uuid} = require("uuidv4")
+const {v4} = require("uuid")
 
 const user = new Schema({
     _id: {
         type: SchemaTypes.UUID,
-        default: uuid()
+        default: v4()
     },
 
     name: {
