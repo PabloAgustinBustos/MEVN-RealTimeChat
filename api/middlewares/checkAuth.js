@@ -11,7 +11,7 @@ function checkAuth(req, res, next){
 
     const decoded = jwt.verify(token, process.env.SECRET_KEY)
 
-    req.body = decoded
+    req.body.decoded = decoded
 
     next()
 }

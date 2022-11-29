@@ -7,8 +7,6 @@ async function checkFriend(req, res, next){
     const {friends} = await User.findById(_id)
     
     const exists = friends.find(f => f._id === friend_id)
-    
-    console.log(exists)
 
     if(exists){
         console.log("ya tiene al amigo agregado")

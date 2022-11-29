@@ -3,7 +3,7 @@ const jwt = require("jsonwebtoken")
 
 async function getUsers(req, res){
     try{
-        const users = await User.find()
+        const users = await User.find({},{username:1, friends:1})
 
         return res.status(200).json(users)
     }catch(e){
@@ -78,7 +78,7 @@ async function login(req, res){
 
 // get users who can be added to my friend list
 async function getAllUsers(req, res){
-    const {_id, username} = req.body
+    const {decoded:{_id, username}} = req.body
 
     try{
         const users = await User.find({
@@ -99,7 +99,7 @@ async function getAllUsers(req, res){
 }
 
 async function addFriend(req, res){
-    const {_id, username} = req.body
+    const {decoded:{_id, username}} = req.body
     const {id: friend_id}  = req.params
 
     try{

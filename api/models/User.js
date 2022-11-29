@@ -39,6 +39,10 @@ const user = new Schema({
         },
 
         messages: [{
+            from: String,
+
+            to: String,
+
             text: {
                 type: String,
                 max: 200
@@ -50,6 +54,21 @@ const user = new Schema({
             }
         }]
     }]
+})
+
+async function breforeUpdate(){
+    return new Promise((resolve, reject) => {
+        if(true){
+            resolve()
+        }else{
+            reject()
+        }
+    })
+}
+
+user.pre("updateOne", async(a, next) => {
+    
+    // await breforeUpdate()
 })
 
 module.exports = model("user", user)
