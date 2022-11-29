@@ -4,7 +4,7 @@ const {v4} = require("uuid")
 const user = new Schema({
     _id: {
         type: SchemaTypes.UUID,
-        default: v4()
+        default: () => v4()
     },
 
     name: {
@@ -31,6 +31,11 @@ const user = new Schema({
     friends: [{
         _id: {
             type: SchemaTypes.UUID,
+        },
+
+        username: {
+            type: String,
+            required: true
         },
 
         messages: [{
