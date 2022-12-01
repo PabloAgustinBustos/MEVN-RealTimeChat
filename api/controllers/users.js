@@ -42,11 +42,11 @@ async function createUser(req, res){
 
         // console.log(resp)
         
-        return res.status(200).json({message: "user created", user: resp})
+        return res.status(200).json({type: "good", msg: "account created"})
     }catch(e){
         console.log(e)
         
-        return res.status(400).json({message: "Error en los campos", errors: e.errors})
+        return res.status(400).json({type: "bad", msg: "there is an error"})
     }
 }
 

@@ -4,26 +4,76 @@
     export default{
         name: "Register",
         
+        data(){
+            return{
+                name: "",
+                username: "",
+                email: "",
+                password: "",
+
+                toastType: "",
+                toastMsg: ""
+            }
+        },
+
+        methods:{
+            async createAccount(){
+                const res = await fetch("http://localhost:3001/user/register", {
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+
+                    body: JSON.stringify({
+                        name: this.name,
+                        username: this.username,
+                        email: this.email,
+                        password: this.password
+                    }),
+
+                    method: "post"
+                })
+
+                const data = await res.json()
+
+                console.log(data)
+
+                this.toastType = data.type
+                this.toastMsg = data.msg
+
+                setTimeout(() => {
+                    this.toastType = ""
+                    this.toastMsg = ""
+                }, 3000)
+
+                if(data.type == "good") {
+                    setTimeout(() => {
+                        this.$router.push("/login")
+                    }, 1500)
+                }
+            }
+        },
+
         components: {Toast}
     }
 </script>
 
 <template>
     <div class="container">
-        <Toast type="good" msg="hola"/>
+        <Toast v-if="(toastType && toastMsg)" :type="toastType" :msg="toastMsg"/>
         <!-- <div class="toast">hola</div> -->
         <h1 class="title">Register</h1>
-        <form class="form">
-            <input class="form--input" type="text" placeholder="name"/>
-            <input class="form--input" type="text" placeholder="username"/>
-            <input class="form--input" type="text" placeholder="email"/>
-            <input class="form--input" type="text" placeholder="password"/>
+        <form class="form" @submit.prevent="createAccount">
+            
+            <input v-model="name" class="form--input" type="text" placeholder="name"/>
+            <input v-model="username" class="form--input" type="text" placeholder="username"/>
+            <input v-model="email" class="form--input" type="text" placeholder="email"/>
+            <input v-model="password" class="form--input" type="text" placeholder="password"/>
             
             <button class="form--button">Create account</button>
         </form>
         
         <span class="question">have an account? <RouterLink to="/login" class="link">Log in</RouterLink></span>
-        
+        <!-- {{userData.name}} -->
     </div>
 
 </template>

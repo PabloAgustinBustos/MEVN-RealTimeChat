@@ -12,6 +12,14 @@
                 type: String,
                 required: true
             }
+        },
+
+        mounted(){
+            console.log("se renderiza toast")
+        },
+
+        unmounted(){
+            console.log("adios")
         }
     }
 </script>
