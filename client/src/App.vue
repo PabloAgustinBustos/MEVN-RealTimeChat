@@ -16,5 +16,7 @@ import { RouterLink, RouterView } from 'vue-router'
     /* background-color: #2B2B2B; */
     background-color: #101010;
     color: #fefefe;
+    position: relative;
+    overflow: hidden;
   }
 </style>

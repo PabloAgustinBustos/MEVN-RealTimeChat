@@ -1,21 +1,31 @@
 <script>
+    import Toast from "../components/Toast.vue"
+
     export default{
-        name: "Register"
+        name: "Register",
+        
+        components: {Toast}
     }
 </script>
 
 <template>
     <div class="container">
+        <Toast type="good" msg="hola"/>
+        <!-- <div class="toast">hola</div> -->
         <h1 class="title">Register</h1>
         <form class="form">
             <input class="form--input" type="text" placeholder="name"/>
             <input class="form--input" type="text" placeholder="username"/>
             <input class="form--input" type="text" placeholder="email"/>
             <input class="form--input" type="text" placeholder="password"/>
-
+            
             <button class="form--button">Create account</button>
         </form>
+        
+        <span class="question">have an account? <RouterLink to="/login" class="link">Log in</RouterLink></span>
+        
     </div>
+
 </template>
 
 <style scoped>
@@ -28,6 +38,11 @@
         justify-content: center;
         align-items: center;
         
+        position: relative;
+    }
+
+    .toast{
+        position: absolute;
     }
 
     .form{
@@ -51,6 +66,10 @@
         box-sizing: border-box;
 
         font-size: 25px;
+        color: white;
+    }
+    
+    .form--input::placeholder{
         color: #7a7a7a;
     }
 
@@ -59,5 +78,21 @@
         border-radius: 10px;
         font-size: 20px;
         cursor: pointer;
+        background-color: rgb(23, 122, 66);
+        color: white;
+        border: 0;
+        transition: .2s transform;
+    }
+
+    .form--button:hover{
+        transform: scale(1.04);
+    }
+
+    .question{
+        font-weight: 100;
+    }
+
+    .link:visited{
+        color: rgb(149, 60, 221);
     }
 </style>
