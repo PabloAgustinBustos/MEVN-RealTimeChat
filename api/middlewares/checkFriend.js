@@ -1,7 +1,7 @@
 const User = require("../models/User")
 
 async function checkFriend(req, res, next){
-    const {_id, username} = req.body
+    const {decoded:{_id}} = req.body
     const {id: friend_id}  = req.params
 
     const {friends} = await User.findById(_id)

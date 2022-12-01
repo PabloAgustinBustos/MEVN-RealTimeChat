@@ -1,4 +1,5 @@
 const User = require("../models/User")
+const saveMessage = require("../utils/saveMessage")
 
 async function getChat(req, res){
     const {decoded: {_id, username}} = req.body
@@ -10,7 +11,7 @@ async function getChat(req, res){
         const {messages} = friends.filter(f => f._id === friend_id)[0]
         
         // ordena desde el último mensaje hasta el más viejo
-        const sortMessages = messages.sort((a,b) => b.timeStamp.getTime() - a.timeStamp.getTime())
+        const sortMessages = messages.sort((a,b) => b.timeStamp - a.timeStamp)
 
         res.status(200).json(sortMessages)
     }catch(e){
@@ -20,34 +21,8 @@ async function getChat(req, res){
 }
 
 async function sendMessage(req, res){
-    const {from, to, text} = req.body
-
     try{
-        const me = await User.findById(from)
-        const him = await User.findById(to)
-
-        me.friends.forEach(f => {
-            if(f._id === to){
-                f.messages.push({
-                    from,
-                    to,
-                    text
-                })
-            }
-        })
-
-        him.friends.forEach(f => {
-            if(f._id === from){
-                f.messages.push({
-                    from,
-                    to,
-                    text
-                })
-            }
-        })
-
-        me.save()
-        him.save()
+        saveMessage(req.body)
     }catch(e){
         console.log(e)
     }

@@ -50,7 +50,7 @@ const user = new Schema({
 
             timeStamp: {
                 type: SchemaTypes.Date,
-                default: Date.now()
+                default: () => new Date(Date.now())
             }
         }]
     }]
