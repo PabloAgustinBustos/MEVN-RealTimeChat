@@ -154,7 +154,7 @@ async function getFriends(req, res){
         
         friends = friends.map(({_id, username}) => ({_id, username}))
 
-        res.status(200).json(friends)
+        res.status(200).json({count: friends.length, friends})
     }catch(e){
         return res.status(400).json({message: "error", e})
     }
