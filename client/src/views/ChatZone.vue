@@ -6,7 +6,7 @@
             const token = localStorage.getItem("token")
             
             if(!token){
-                this.$router.push("/register")
+                this.$router.push("/login")
             }
         }
     }

@@ -1,5 +1,6 @@
 <script>
     import Toast from "../components/Toast.vue"
+    import { isLogged, navigateIfLogged } from "../utils"
 
     export default{
         name: "Register",
@@ -15,6 +16,11 @@
                 toastMsg: ""
             }
         },
+
+        beforeMount(){
+            
+            navigateIfLogged(this.$router)
+        }, 
 
         methods:{
             async createAccount(){
@@ -140,6 +146,10 @@
 
     .question{
         font-weight: 100;
+    }
+
+    .link{
+        color:rgb(46, 103, 247);
     }
 
     .link:visited{

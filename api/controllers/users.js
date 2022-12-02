@@ -62,14 +62,14 @@ async function login(req, res){
             password
         })
         
-        if(!resp) return res.status(404).json({message: "user not found"})
+        if(!resp) return res.status(404).json({type:"bad", text: "user doesn't exist"})
 
         const token = jwt.sign({
             _id: resp._id,
             username,
         }, process.env.SECRET_KEY, {expiresIn: "30d"})
 
-        return res.status(200).json({message: "logged", token})
+        return res.status(200).json({type:"good", token, text:"loading..."})
     }catch(e){
         console.log(e)
         return res.status(400).json({message: "Error en los campos", errors: e.errors})
