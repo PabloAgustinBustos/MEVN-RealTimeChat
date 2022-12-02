@@ -145,11 +145,27 @@ async function addFriend(req, res){
     }
 }
 
+async function getFriends(req, res){
+    const {decoded:{_id, username}} = req.body
+
+    try{
+        
+        let {friends} = await User.findOne({_id})
+        
+        friends = friends.map(({_id, username}) => ({_id, username}))
+
+        res.status(200).json(friends)
+    }catch(e){
+        return res.status(400).json({message: "error", e})
+    }
+}
+
 module.exports = {
     getUsers,
     getUser,
     createUser,
     login,
     getAllUsers,
-    addFriend
+    addFriend,
+    getFriends
 }
