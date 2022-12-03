@@ -81,15 +81,24 @@ async function getAllUsers(req, res){
     const {decoded:{_id, username}} = req.body
 
     try{
-        const users = await User.find({
+        let {friends} = await User.findOne({_id})
+
+        friends = friends.map(f => (f.username))
+
+        console.log(friends)
+
+        let users = await User.find({
             _id: {
                 $ne: _id
             },
 
-            username: {
-                $ne: username
-            }
+            $and: [
+                {username: {$ne: username}},
+                {username: {$nin: friends}}
+            ]
         })
+
+
 
         return res.status(200).json(users)
     }catch(e){

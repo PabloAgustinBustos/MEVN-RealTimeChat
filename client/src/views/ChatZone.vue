@@ -1,4 +1,6 @@
 <script>
+    import Chat from "../components/Chat.vue"
+
     export default {
         name: "ChatZone",
 
@@ -13,6 +15,8 @@
                 reqStatus: ""
             }
         },
+
+        components:{Chat},
 
         beforeMount(){
             const token = localStorage.getItem("token")
@@ -43,6 +47,19 @@
                 this.friends = data.friends
                 this.friendsCount = 1
                 this.reqStatus = "ready"
+            },
+
+            async addFriend(){
+                const res = await fetch("http://localhost:3001/user/auth/get", {
+                    method: "post",
+                    headers:{
+                        "Authorization": `Bearer ${this.token}`
+                    }
+                })
+
+                const data = await res.json()
+
+                console.log(data)
             }
         }
     }
@@ -57,7 +74,7 @@
         <div class="content">
             <section class="content--friends">
                 <section class="friends__add">
-                    <button class="btn-add">+</button>
+                    <button @click="addFriend" class="btn-add">+</button>
                 </section>
 
                 <ul v-if="(friendsCount > 0)" class="friends__list">
@@ -71,6 +88,11 @@
             <section class="content--chat">
                 <div class="chat__panel" v-if="!currentChat">
                     Select a friend you want to talk with
+                </div>
+                
+                <div class="chat__panel" v-else>
+                    {{currentChat}}
+                    <Chat/>
                 </div>
             </section>
         </div>
