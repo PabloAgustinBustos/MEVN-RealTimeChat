@@ -3,7 +3,7 @@ const {v4} = require("uuid")
 
 const user = new Schema({
     _id: {
-        type: SchemaTypes.UUID,
+        type: String,
         default: () => v4()
     },
 
@@ -28,9 +28,14 @@ const user = new Schema({
         required: [true, "Campo contraseña es obligatorio"],
     },
 
+    status: {
+        type: String,
+        enum: ["connected", "disconnected"]
+    },
+
     friends: [{
         _id: {
-            type: SchemaTypes.UUID,
+            type: String,
         },
 
         username: {

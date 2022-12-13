@@ -68,8 +68,8 @@ async function login(req, res){
             _id: resp._id,
             username,
         }, process.env.SECRET_KEY, {expiresIn: "30d"})
-
-        return res.status(200).json({type:"good", token, text:"loading..."})
+        
+        return res.status(200).json({type:"good", token, _id: resp._id, text:"loading..."})
     }catch(e){
         console.log(e)
         return res.status(400).json({message: "Error en los campos", errors: e.errors})
@@ -85,7 +85,7 @@ async function getAllUsers(req, res){
 
         friends = friends.map(f => (f.username))
 
-        console.log(friends)
+        
 
         let users = await User.find({
             _id: {
@@ -97,8 +97,6 @@ async function getAllUsers(req, res){
                 {username: {$nin: friends}}
             ]
         })
-
-
 
         return res.status(200).json(users)
     }catch(e){
@@ -161,7 +159,7 @@ async function getFriends(req, res){
         
         let {friends} = await User.findOne({_id})
         
-        friends = friends.map(({_id, username}) => ({_id, username}))
+        friends = friends.map(({_id, username, status}) => ({_id, username, status}))
 
         res.status(200).json({count: friends.length, friends})
     }catch(e){

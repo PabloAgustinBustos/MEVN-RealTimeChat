@@ -37,6 +37,7 @@
                 const data = await res.json()
 
                 localStorage.setItem("token", data.token)
+                localStorage.setItem("_id", data._id)
                 
                 this.toastType = data.type
                 this.toastMsg = data.text

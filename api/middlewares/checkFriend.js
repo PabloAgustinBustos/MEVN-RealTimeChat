@@ -1,11 +1,13 @@
 const User = require("../models/User")
 
 async function checkFriend(req, res, next){
+    console.log("check friends")
     const {decoded:{_id}} = req.body
     const {id: friend_id}  = req.params
 
+
     const {friends} = await User.findById(_id)
-    
+
     const exists = friends.find(f => f._id === friend_id)
 
     if(exists){

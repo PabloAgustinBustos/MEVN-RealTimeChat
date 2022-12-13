@@ -1,5 +1,7 @@
 <script>
+    import {io} from "socket.io-client"
     import Chat from "../components/Chat.vue"
+    import src from "../assets/logout.png"
 
     export default {
         name: "ChatZone",
@@ -7,30 +9,105 @@
         data(){
             return {
                 token: "",
+                _id: "",
+
+                showUsers: false,
+                users: [],
+
                 friends: [],
                 friendsCount: 0,
 
-                currentChat:"",
+                currentChat: "",
+                currentSocket: "",
+                currentSocketId: "",
 
-                reqStatus: ""
+                reqStatus: "",
+
+                chatMessage: "",
+
+                src,
+
+                id: null,
+                socket: null,
             }
         },
 
-        components:{Chat},
+        components: {Chat},
+
+        watch:{
+            socket(current, prev){
+                this.socket.on("user-connected", users => {
+                    console.log("users conectados",users)
+                    console.log("friends",this.friends)
+
+                    this.friends = this.friends.map(f => {
+                        console.log("is", f._id, "in", users, "?", !!users.find(u => u._id === f._id))
+
+                        if(users.find(u => u._id === f._id)){
+                            return{
+                                ...f,
+                                status: "connected"
+                            }
+                        }else{
+                            return {
+                                ...f,
+                                status: "disconnected"
+                            }
+                        }
+                    })
+                })
+
+                this.socket.on("user-disconnected", users => {
+                    console.log("se desconectó un user")
+                    console.log("users conectados",users)
+                    console.log("friends",this.friends)
+
+                    this.friends = this.friends.map(f => {
+                        console.log("is", f._id, "in", users, "?", !!users.find(u => u._id === f._id))
+
+                        if(!users.find(u => u._id === f._id)){
+                            return{
+                                ...f,
+                                status: "disconnected"
+                            }
+                        }else{
+                            return {
+                                ...f
+                            }
+                        }
+                    })
+                })
+            },
+
+            friends(current, prev){
+                if(current.length > 0 && this.socket === null){
+                    this.socket = io("http://localhost:3002", {
+                        auth: {
+                            _id: this._id,
+                            token: this.token
+                        }
+                    })
+                }
+            }
+        },
 
         beforeMount(){
             const token = localStorage.getItem("token")
+            const _id = localStorage.getItem("_id")
             
             if(!token){
                 return this.$router.push("/login")
             }
 
             this.token = token
+            this._id = _id
             this.reqStatus = "loading"
         },
-
+        
         mounted(){
-            this.fetchFriends()
+            if(this.token){
+                this.fetchFriends()
+            }
         },
 
         methods: {
@@ -42,25 +119,64 @@
                     }
                 })
 
-                const data = await res.json()
+                let {friends} = await res.json()
 
-                this.friends = data.friends
+                console.log(friends)
+
+                this.friends = friends
                 this.friendsCount = 1
                 this.reqStatus = "ready"
             },
 
-            async addFriend(){
-                const res = await fetch("http://localhost:3001/user/auth/get", {
-                    method: "post",
+            async getUsers(){
+                if(this.users.length === 0){
+                    const res = await fetch("http://localhost:3001/user/auth/get", {
+                        method: "post",
+                        headers:{
+                            "Authorization": `Bearer ${this.token}`
+                        }
+                    })
+    
+                    const data = await res.json()
+                    
+                    this.users = data
+                }
+
+                this.showUsers = true
+            },
+
+            async addFriend(id){
+                const res = await fetch("http://localhost:3001/user/auth/add/"+id, {
+                    method: "put",
                     headers:{
                         "Authorization": `Bearer ${this.token}`
                     }
                 })
+            },
 
-                const data = await res.json()
+            closePanel(){
+                this.$refs.panel.classList.add("hidePanel")
+                this.$refs.users.classList.add("users_hide")
+                setTimeout(() => {
+                    this.showUsers = false
+                }, 400)
+            },
 
-                console.log(data)
-            }
+            logout(){
+                this.socket.emit("close-connection", this._id)
+
+                localStorage.removeItem("token")
+                this.$router.push("/login")
+            },
+
+            async openChat(friend){
+                this.currentChat = friend
+                
+                // const {socketId: to, _id} = this.friends.find(f => f._id === this.currentChat)
+                
+                // this.currentSocketId = to
+                
+            },
         }
     }
 </script>
@@ -73,37 +189,79 @@
     <div class="container" v-else-if="reqStatus === 'ready'">
         <div class="content">
             <section class="content--friends">
+                {{this.socket.id}}
+
+                <!-- botón para añadir amigos -->
                 <section class="friends__add">
-                    <button @click="addFriend" class="btn-add">+</button>
+                    <button @click="getUsers" class="btn-add">+</button>
                 </section>
 
+                <!-- lista de mis amigos -->
                 <ul v-if="(friendsCount > 0)" class="friends__list">
-                    <li class="item" v-for="friend in friends" id="friend._id" key="friend._id">{{friend.username}}</li>
+                    <li v-for="friend in friends" class="item" id="friend._id" key="friend._id" @click="openChat(friend)">
+                        <div :class='`status ${friend.status}`'></div>
+                        {{friend.username}}
+                    </li>
                 </ul>
+
                 <div v-else class="friends__panel">
                     <h1 class="message">you have 0 friends <span class="light">Add somebody</span></h1>  
+                </div>
+
+                <div @click="logout" class="image-container">
+                    <img class="image" :src="src"/>
                 </div>
             </section>
 
             <section class="content--chat">
-                <div class="chat__panel" v-if="!currentChat">
+                <div v-if="!currentChat" class="chat__panel">
                     Select a friend you want to talk with
                 </div>
                 
-                <div class="chat__panel" v-else>
-                    {{currentChat}}
-                    <Chat/>
-                </div>
+                <Chat v-else 
+                    :friend="currentChat" 
+                    :myId="this._id"        
+                    :socket="socket"
+                />
             </section>
+        </div>
+
+        <div ref="users" v-if="showUsers" class="users">
+            <div ref="panel" class="panel">
+                <span @click="closePanel" class="closeButton">+</span>
+                <ul class="list">
+                    <li @click="addFriend(user._id)" class="user" v-for="user in users" key="user._id">{{user.username}}</li>
+                </ul>
+            </div>
         </div>
     </div>
     
     <div class="container" v-else>
         <h1 class="status">Error al cargar los amigos D:</h1>
     </div>
+
 </template>
 
 <style scoped>
+    .content--chat{
+        /* height: 100%; */
+        background-color: black;
+    }
+
+    .status{
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+    }
+
+    .connected{
+        background-color: rgb(51, 172, 103);
+    }
+
+    .disconnected{
+        background-color: rgb(172, 51, 51);;
+    }
+
     .container{
         width: 100%;
         height: 100%;
@@ -111,10 +269,119 @@
         display: flex;
         justify-content: center;
         align-items: center;
+
+        position: relative;
     }
 
     .status{
         font-size: 120px;
+    }
+
+    .image{
+        width: 40px;
+        filter: invert(100%);
+        cursor: pointer;
+    }
+
+    .users{
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.435);
+        position: absolute;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        animation-name: show;
+        animation-duration: .5s;
+        animation-timing-function: ease-in-out;
+    }
+
+    .users_hide{
+        animation-name: hide;
+    }
+
+    @keyframes show{
+        0%{
+            opacity: 0;
+        }
+
+        100%{
+            opacity: 1;
+        }
+    }
+
+    @keyframes hide{
+        0%{
+            opacity: 1;
+        }
+
+        100%{
+            opacity: 0;
+        }
+    }
+    
+    .panel{
+        width: 410px;
+        height: 490px;
+        background-color: #191919;
+        border-radius: 2px;
+        position: relative;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        animation-name: showPanel;
+        animation-duration: .5s;
+        animation-timing-function: ease-in-out;
+    }
+
+    .hidePanel{
+        animation-name: hidePanel;
+    }
+
+    @keyframes showPanel{
+        0%{
+            transform: scale(0);
+        }
+
+        80%{
+            transform: scale(1.1);
+        }
+
+        100%{
+            transform: scale(1);
+        }
+    }
+
+    @keyframes hidePanel{
+        0%{
+            transform: scale(1);
+        }
+
+        100%{
+            transform: scale(0);
+        }
+    }
+
+    .closeButton{
+        position: absolute;
+        top: 0px;
+        right: 15px;
+        font-size: 60px;
+        cursor: pointer;
+        color: rgb(172, 51, 51);
+        transform: rotate(45deg);
+    }
+
+    .list{
+        margin-left: 20px;
+        width: 100%;
+        height: 70%;
+        list-style: none;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 30px;
+        cursor: pointer;
     }
 
     .content{
@@ -123,7 +390,7 @@
         /* background-color: rgb(38, 89, 126); */
 
         display: grid;
-        grid-template-columns: 1fr 3fr;
+        grid-template-columns: 1fr 4fr;
     }
 
     .content--friends{
@@ -134,8 +401,16 @@
         overflow: auto;
     }
 
+    .item{
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
     .friends__add{
-        /* background-color: bisque; */
+        
+        
         display: flex;
         justify-content: center;
         align-items: center;
@@ -145,7 +420,7 @@
         background: none;
         border: none;
         font-size: 80px;
-        color:aliceblue;
+        color: rgb(51, 172, 103);
         cursor: pointer;
         transition: transform .3s;
     }
@@ -195,17 +470,17 @@
         font-size: 30px;
     }
 
-    .content--chat{
-        /* background-color: rgba(165, 42, 42, 0.657); */
-    }
-
     .chat__panel{
         width: 100%;
         height: 100%;
-        background-color: black;
+        /* background-color: black; */
+        border-radius: 3px;
+        font-size: 50px;
         display: flex;
+        flex-direction: column;
         align-items: center;
         justify-content: center;
-        font-size: 50px;
     }
+
+    
 </style>

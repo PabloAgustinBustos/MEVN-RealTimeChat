@@ -33,9 +33,9 @@
     
     .message-text{
         max-width: 80%;
-        padding: 5px 10px;
-        border-radius: 10px;
-        box-sizing: border-box;
+        padding: 7px 10px;
+        border-radius: 8px;
+        /* box-sizing: border-box; */
     }
 
     .color-me{

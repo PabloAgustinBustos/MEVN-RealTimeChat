@@ -2,8 +2,9 @@ const jwt = require("jsonwebtoken")
 
 function checkAuth(req, res, next){
     const { authorization: authHeader } = req.headers
-
+    
     if(!authHeader || !authHeader.startsWith("Bearer ")){
+        console.log("not allowed")
         throw new Error("Not allowed to make that request")
     }
 
