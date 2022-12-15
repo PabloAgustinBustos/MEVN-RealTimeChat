@@ -37,12 +37,7 @@
         watch:{
             socket(current, prev){
                 this.socket.on("user-connected", users => {
-                    console.log("users conectados",users)
-                    console.log("friends",this.friends)
-
                     this.friends = this.friends.map(f => {
-                        console.log("is", f._id, "in", users, "?", !!users.find(u => u._id === f._id))
-
                         if(users.find(u => u._id === f._id)){
                             return{
                                 ...f,
@@ -58,13 +53,7 @@
                 })
 
                 this.socket.on("user-disconnected", users => {
-                    console.log("se desconectó un user")
-                    console.log("users conectados",users)
-                    console.log("friends",this.friends)
-
                     this.friends = this.friends.map(f => {
-                        console.log("is", f._id, "in", users, "?", !!users.find(u => u._id === f._id))
-
                         if(!users.find(u => u._id === f._id)){
                             return{
                                 ...f,
@@ -73,6 +62,23 @@
                         }else{
                             return {
                                 ...f
+                            }
+                        }
+                    })
+                })
+
+                this.socket.on("added-friend", users => {
+                    console.log(users)
+                    this.friends = this.friends.map(f => {
+                        if(users.find(u => u._id === f._id)){
+                            return{
+                                ...f,
+                                status: "connected"
+                            }
+                        }else{
+                            return {
+                                ...f,
+                                status: "disconnected"
                             }
                         }
                     })
@@ -105,7 +111,6 @@
         },
         
         mounted(){
-            console.log("se montó")
             if(this.token){
                 this.fetchFriends()
             }
@@ -122,11 +127,13 @@
 
                 let {friends} = await res.json()
 
-                console.log(friends)
+                
 
                 this.friends = friends
                 this.friendsCount = 1
                 this.reqStatus = "ready"
+
+                if(this.socket !== null) this.socket.emit("update-status", this._id)
             },
 
             async getUsers(){
@@ -153,6 +160,10 @@
                         "Authorization": `Bearer ${this.token}`
                     }
                 })
+
+                this.users = this.users.filter(u => u._id !== id)
+
+                this.fetchFriends()
             },
 
             closePanel(){

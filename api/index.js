@@ -55,6 +55,10 @@ try{
             socket.broadcast.emit("user-disconnected", sessions)
         })
 
+        socket.on("update-status", _id => {
+            socket.emit("added-friend", sessions)
+        })
+
         socket.on("send-message", obj => {
 
             console.log("mensaje de", obj.from)
