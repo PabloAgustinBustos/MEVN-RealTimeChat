@@ -5,6 +5,7 @@ const User = require("./models/User")
 require("dotenv").config({path: `${__dirname}/.env`})
 
 const {createServer} = require("http")
+const saveMessage = require("./utils/saveMessage")
 
 
 const server = createServer(app)
@@ -24,48 +25,25 @@ try{
         socket._id = socket.handshake.auth._id
         socket.token = socket.handshake.auth.token
 
-        // console.log("|", _id, "->", token, "|")
-
-        // if(sessionID){
-        //     // encuentra la sesión existente
-        //     const session = sessions.find(sessionID)
-
-        //     if(session){
-        //         socket._id = session._id
-        //         socket.sessionID = sessionID     
-                
-        //         return next()
-        //     }
-        // }
-        // // public como un identificatorio para cambiar mensajes
-        // const _id = socket.handshake.auth._id
-        
-        // socket._id = _id
-        // socket.sessionID = sessionID
-
         next()
     })
 
-    // io.of("/").adapter.on("join-room", (room, id) => {
-    //     console.log(`socket ${id} has joined room ${room}`);
-    // });
-
-    // io.of("/").adapter.on("leave-room", (room, id) => {
-    //     console.log(`socket ${id} has leaved room ${room}`);
-    // });
-
     io.on("connection", async socket => {
-        // socket.joing(socket._id)
+        socket.join(socket._id)
         
         // console.log("|", socket._id, "->", socket.token, "|")
         
-        sessions.push({
-            _id: socket._id
-        })
+        const isConnected = sessions.some(user => user._id === socket._id)
+
+        if(!isConnected){
+            sessions.push({
+                _id: socket._id,
+                id: socket.id
+            })
+        }
 
         console.log("new-sessions",sessions)
 
-        // io.emit("user-connected", sessions.filter(client => client._id !== socket._id))
         io.emit("user-connected", sessions)
 
         socket.on("close-connection", async _id => {
@@ -78,35 +56,30 @@ try{
         })
 
         socket.on("send-message", obj => {
-            const users = []
 
-            for(let [id] of io.of("/").sockets){
-                users.push(id)
-            }
-
-            console.log("mensaje de", obj.id)
+            console.log("mensaje de", obj.from)
             console.log("para", obj.to)
 
-            io.to(obj.to).to(socket.id).emit("send-message", {
+            io.to(obj.to).to(obj.from).emit("send-message", {
                 from: socket._id,
                 text: obj.text,
                 to: obj.to,
             })
             // console.log("alguien mandó un mensaje")
 
-            // const message = {
-            //     decoded:{
-            //         _id: obj.from
-            //     },
-            //     to: obj.to,
-            //     text: obj.text
-            // }
+            const message = {
+                decoded:{
+                    _id: obj.from
+                },
+                to: obj.to,
+                text: obj.text
+            }
 
-            // try{
-            //     saveMessage(message, socket)
-            // }catch(e){
-            //     console.log("error", e)
-            // }
+            try{
+                saveMessage(message)
+            }catch(e){
+                console.log("error", e)
+            }
         })
     })
 

@@ -105,6 +105,7 @@
         },
         
         mounted(){
+            console.log("se montó")
             if(this.token){
                 this.fetchFriends()
             }
@@ -169,7 +170,8 @@
                 this.$router.push("/login")
             },
 
-            async openChat(friend){
+            openChat(friend){
+                this.currentChat = ""
                 this.currentChat = friend
                 
                 // const {socketId: to, _id} = this.friends.find(f => f._id === this.currentChat)
@@ -189,8 +191,6 @@
     <div class="container" v-else-if="reqStatus === 'ready'">
         <div class="content">
             <section class="content--friends">
-                {{this.socket.id}}
-
                 <!-- botón para añadir amigos -->
                 <section class="friends__add">
                     <button @click="getUsers" class="btn-add">+</button>
@@ -198,7 +198,14 @@
 
                 <!-- lista de mis amigos -->
                 <ul v-if="(friendsCount > 0)" class="friends__list">
-                    <li v-for="friend in friends" class="item" id="friend._id" key="friend._id" @click="openChat(friend)">
+                    <!-- amigo -->
+                    <li 
+                        v-for="friend in friends" 
+                        :class="`item ${currentChat._id === friend._id ? 'selected' : ''}`"
+                        id="friend._id" 
+                        key="friend._id" 
+                        @click="openChat(friend)"
+                    >
                         <div :class='`status ${friend.status}`'></div>
                         {{friend.username}}
                     </li>
@@ -222,6 +229,7 @@
                     :friend="currentChat" 
                     :myId="this._id"        
                     :socket="socket"
+                    :token="token"
                 />
             </section>
         </div>
@@ -402,10 +410,23 @@
     }
 
     .item{
+        height: 50px;
+        padding: 10px;
+        
+        font-size: 30px;
         cursor: pointer;
         display: flex;
         align-items: center;
         gap: 10px;
+        /* background-color: aqua; */
+        /* border: 1px solid black; */
+        box-sizing: border-box;
+
+        transition: font-size .2s;
+    }
+
+    .selected{
+        font-size: 50px;
     }
 
     .friends__add{
@@ -450,9 +471,11 @@
     .friends__list{
         height: 100%;
         /* background-color: green; */
-        padding: 0;
+        padding: 20px;
+        box-sizing: border-box;
         list-style: none;
         overflow-y: auto;
+        overflow-x: hidden;
     }
 
     .friends__list::-webkit-scrollbar{
@@ -462,12 +485,6 @@
     .friends__list::-webkit-scrollbar-thumb{
         background-color: #A2AABC;
         
-    }
-
-    .item{
-        padding: 10px;
-        /* background-color: blueviolet; */
-        font-size: 30px;
     }
 
     .chat__panel{

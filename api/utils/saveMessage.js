@@ -10,8 +10,8 @@ async function saveMessage({decoded: {_id: from}, to, text}, socket){
     me.friends.forEach(f => {
         if(f._id === to){
             f.messages.push({
-                from: me.username,
-                to: f.username,
+                from: me._id,
+                to: f._id,
                 text
             })
         }
@@ -20,8 +20,8 @@ async function saveMessage({decoded: {_id: from}, to, text}, socket){
     him.friends.forEach(f => {
         if(f._id === from){
             f.messages.push({
-                from: me.username,
-                to: him.username,
+                from: me._id,
+                to: him._id,
                 text
             })
         }

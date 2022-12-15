@@ -13,101 +13,71 @@
         },
 
         watch:{
-            chat(newValue, prevValue){
-                // console.log(newValue)
+            friend(newValue, prevValue){
+                this.chat = []
+                this.fetchMessages()
             },
         },
 
         mounted(){
+            console.log("se abrió un chat")
+            this.fetchMessages()
             this.socket.on("send-message", obj => {
-                console.log("recibí un mensaje", obj)
+                this.chat.unshift(obj)
             })
         },        
 
         methods:{
-            // async getChat(){
-            //     console.log("voy a actualizar")
-            //     const res = await fetch(`http://localhost:3001/chat/auth/${this.friendId}`, {
-            //         headers: {
-            //             "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI3YjNkYjRjZS00YjRjLTQxYWItODMyOS0yMmZiMTY2Mjk3OTIiLCJ1c2VybmFtZSI6InBhYmxvIiwiaWF0IjoxNjY5ODYwOTU5LCJleHAiOjE2NzI0NTI5NTl9.DUsatgXBxZLfyPMjWtuBvvVnMdU7wNQtl0JDfLVC9e4"
-            //         }
-            //     })
-            //     const data = await res.json()
+            async fetchMessages(){
+                const res = await fetch("http://localhost:3001/chat/auth/"+this.friend._id, {
+                    headers: {
+                        "Authorization": "Bearer " + this.token
+                    }
+                })
 
-            //     console.log("recibí el nuevo chat", data)
+                const data = await res.json()
 
-            //     this.chat = [...data]
-            // }
+                data.forEach(m => this.chat.push(m))
+            },
 
             sendMessage(){                
                 this.socket.emit("send-message", {
                     text:this.chatMessage,
                     from: this.myId,
-                    to: this.friend.socketId,
+                    to: this.friend._id,
                 });
+
+                this.chatMessage = ""
             }
         },
 
         components: {Message},
 
-        props: ["friend", "socket", "myId"]
+        props: ["friend", "socket", "myId", "token"]
     }
 </script>
 
 <template>
     <section class="container">
         <section class="chat-container">
-            <Message from="friend" text="que queres"/>
-            <Message from="me" text="puto"/>
+            <Message 
+                v-for="message in chat" 
+                :from="message.from === myId ? 'me' : 'friend'"
+                :text="message.text"
+            />
         </section>
 
         <div class="control">
             <input v-model="chatMessage" class="input" type="text"/>
             <button @click="sendMessage" class="button">send</button>
         </div>
-        
-        <!-- <section class="chat-container">
-            <Message v-for="msg in this.chat" 
-                :from="msg.from === myUsername ? 'me' : 'friend'"
-                :text="msg.text"
-            />
-            <Message from="me" text="puto"/>
-            <Message from="me" text="nada"/>
-            <Message from="friend" text="QUE MIERDA QUERES"/>
-            <Message from="friend" text="que queres"/>
-            <Message from="me" text="holaaaaaaaaaaa"/>
-            <Message from="me" text="explicame culo roto"/>
-            <Message from="me" text="no entendí"/>
-            <Message from="me" text="khe"/>
-            <Message from="friend" text="Lorem, ipsum dolor sit amet consectetur adipisicing elit. Soluta eum debitis doloribus aperiam, quaerat explicabo nemo totam accusamus veniam consequuntur ex recusandae et tempore vel, maxime animi commodi iusto a."/>
-            <Message from="me" text="si ya se waton"/>
-            <Message from="friend" text="hola soy un mensaje"/>
-        </section> -->
-
     </section>
 </template>
 
 <style scoped>
-    .container{
-        /* height: 100%; */
-        /* background-color: aqua; */
-        
-        /* display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        align-items: center; */
-        /* display: flex;
-        flex-direction: column;
-        position: relative; */
-    }
-
     .chat-container{
         width: 100%;
         height: 95%;
-        /* width: 100%;
-        height: 100%; */
-        /* background-color: #0f0f0f; */
-        /* background-color: black; */
         
         padding: 30px 20px;
         border-radius: 5px;
