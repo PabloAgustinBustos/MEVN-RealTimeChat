@@ -88,8 +88,8 @@ try{
     })
 
     connectDB(process.env.MONGO_URI)
-    app.listen(3001, () => console.log("server listening on port " + 3001))
-    io.listen(3002)
+    app.listen(process.env.PORT || 3001, () => console.log("server listening on port " + process.env.PORT))
+    io.listen(process.env.SOCKET_PORT || 3002)
 }catch(e){
     console.log("error al conectar con la db o con express", e)
 }
