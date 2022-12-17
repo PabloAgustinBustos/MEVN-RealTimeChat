@@ -31,7 +31,7 @@
         components: {Chat},
 
         beforeMount(){
-            this.socket = io("http://localhost:3002")
+            this.socket = io("https://mevn-realtimechat-production.up.railway.app:3002")
 
             this.socket.on("good-connection", (msg) => {
                 console.log(msg)

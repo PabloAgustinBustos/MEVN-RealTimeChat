@@ -87,7 +87,7 @@
 
             friends(current, prev){
                 if(current.length > 0 && this.socket === null){
-                    this.socket = io("http://localhost:3002", {
+                    this.socket = io("https://mevn-realtimechat-production.up.railway.app:3002", {
                         auth: {
                             _id: this._id,
                             token: this.token
