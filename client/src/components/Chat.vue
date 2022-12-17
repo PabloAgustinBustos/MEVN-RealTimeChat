@@ -29,7 +29,7 @@
 
         methods:{
             async fetchMessages(){
-                const res = await fetch("http://localhost:3001/chat/auth/"+this.friend._id, {
+                const res = await fetch("https://mevn-realtimechat-production.up.railway.app/chat/auth/"+this.friend._id, {
                     headers: {
                         "Authorization": "Bearer " + this.token
                     }

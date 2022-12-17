@@ -118,7 +118,7 @@
 
         methods: {
             async fetchFriends(){
-                const res = await fetch("http://localhost:3001/user/auth/friends", {
+                const res = await fetch("https://mevn-realtimechat-production.up.railway.app/user/auth/friends", {
                     method: "get",
                     headers:{
                         "Authorization": `Bearer ${this.token}`
@@ -138,7 +138,7 @@
 
             async getUsers(){
                 if(this.users.length === 0){
-                    const res = await fetch("http://localhost:3001/user/auth/get", {
+                    const res = await fetch("https://mevn-realtimechat-production.up.railway.app/user/auth/get", {
                         method: "post",
                         headers:{
                             "Authorization": `Bearer ${this.token}`
@@ -154,7 +154,7 @@
             },
 
             async addFriend(id){
-                const res = await fetch("http://localhost:3001/user/auth/add/"+id, {
+                const res = await fetch("https://mevn-realtimechat-production.up.railway.app/user/auth/add/"+id, {
                     method: "put",
                     headers:{
                         "Authorization": `Bearer ${this.token}`

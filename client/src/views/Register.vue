@@ -24,7 +24,7 @@
 
         methods:{
             async createAccount(){
-                const res = await fetch("http://localhost:3001/user/register", {
+                const res = await fetch("https://mevn-realtimechat-production.up.railway.app/user/register", {
                     headers: {
                         'Content-Type': 'application/json',
                     },

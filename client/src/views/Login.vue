@@ -21,7 +21,7 @@
 
         methods: {
             async logIn(){
-                const res = await fetch("http://localhost:3001/user/login", {
+                const res = await fetch("https://mevn-realtimechat-production.up.railway.app/user/login", {
                     headers: {
                         'Content-Type': 'application/json',
                     },
