@@ -41,13 +41,15 @@
             },
 
             sendMessage(){                
-                this.socket.emit("send-message", {
-                    text:this.chatMessage,
-                    from: this.myId,
-                    to: this.friend._id,
-                });
-
-                this.chatMessage = ""
+                if(this.chatMessage.length > 0){
+                    this.socket.emit("send-message", {
+                        text:this.chatMessage,
+                        from: this.myId,
+                        to: this.friend._id,
+                    });
+    
+                    this.chatMessage = ""
+                }
             }
         },
 
@@ -69,7 +71,7 @@
 
         <div class="control">
             <input v-model="chatMessage" class="input" type="text"/>
-            <button @click="sendMessage" class="button">send</button>
+            <button :disabled="!(chatMessage.length > 0)" @click="sendMessage" class="button">send</button>
         </div>
     </section>
 </template>
